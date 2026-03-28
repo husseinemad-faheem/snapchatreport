@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقرير أداء إعلانات سنابشات — 12 شهر</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --snap: #FFFC00;
+  --snap-dark: #E6E300;
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface2: #181818;
+  --border: rgba(255,255,255,0.07);
+  --text: #f0f0f0;
+  --muted: #888;
+  --green: #22c55e;
+  --green-bg: rgba(34,197,94,0.1);
+  --red: #ef4444;
+  --red-bg: rgba(239,68,68,0.1);
+  --amber: #f59e0b;
+  --amber-bg: rgba(245,158,11,0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: var(--snap);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-icon svg { width: 18px; height: 18px; }
+.logo-text { font-size: 15px; font-weight: 700; color: var(--text); }
+.header-meta { font-size: 12px; color: var(--muted); }
+.badge-live {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(34,197,94,0.12); color: var(--green);
+  border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 99px; padding: 3px 10px; font-size: 11px; font-weight: 600;
+}
+.badge-live::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* MAIN */
+.main { max-width: 1280px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+/* PAGE TITLE */
+.page-title { margin-bottom: 2rem; }
+.page-title h1 { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+.page-title p { font-size: 13px; color: var(--muted); }
+.page-title .snap-accent { color: var(--snap); }
+
+/* KPI GRID */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 12px;
+  margin-bottom: 2.5rem;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  transition: border-color .2s;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 60px; height: 60px;
+  background: radial-gradient(circle, rgba(255,252,0,0.08) 0%, transparent 70%);
+  border-radius: 0 14px 0 0;
+}
+.kpi-card:hover { border-color: rgba(255,252,0,0.2); }
+.kpi-label { font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
+.kpi-value { font-size: 26px; font-weight: 900; color: #fff; line-height: 1; margin-bottom: 4px; }
+.kpi-sub { font-size: 11px; color: var(--muted); }
+.kpi-snap { color: var(--snap); }
+
+/* SECTION */
+.section { margin-bottom: 2.5rem; }
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.section-title { font-size: 16px; font-weight: 700; color: #fff; }
+.section-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* CHART TABS */
+.chart-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.ctab {
+  padding: 5px 14px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Cairo', sans-serif;
+  transition: all .15s;
+}
+.ctab:hover { border-color: rgba(255,252,0,0.3); color: var(--snap); }
+.ctab.on { background: var(--snap); color: #000; border-color: var(--snap); }
+
+/* CHART CARD */
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+.chart-wrapper { position: relative; width: 100%; height: 280px; }
+
+/* TABLE */
+.table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead tr { background: var(--surface2); }
+th {
+  padding: 12px 16px;
+  text-align: right;
+  font-size: 11px; font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase; letter-spacing: .05em;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 16px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  color: var(--text);
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: rgba(255,255,255,0.02); }
+.month-cell { font-weight: 700; color: #fff; }
+
+/* PILLS */
+.pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px; font-weight: 700;
+}
+.pg { background: var(--green-bg); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+.pr { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+.py { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+.pn { color: var(--text); }
+
+/* INSIGHTS */
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+.insight-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+}
+.insight-tag {
+  display: inline-block;
+  padding: 3px 10px; border-radius: 99px;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: 10px;
+}
+.tag-good { background: var(--green-bg); color: var(--green); }
+.tag-warn { background: var(--amber-bg); color: var(--amber); }
+.tag-info { background: rgba(99,179,237,0.1); color: #63b3ed; }
+.insight-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.insight-body { font-size: 12px; color: var(--muted); line-height: 1.7; }
+.insight-metric { font-size: 22px; font-weight: 900; color: var(--snap); margin: 8px 0 4px; }
+
+/* FOOTER */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; color: var(--muted);
+}
+
+/* RESPONSIVE */
+@media(max-width: 640px) {
+  .header { padding: 0 1rem; }
+  .main { padding: 1.5rem 1rem; }
+  .kpi-value { font-size: 20px; }
+  th, td { padding: 10px 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="black"><path d="M12.166 3c-3.672.002-6.546 2.554-6.546 6.633 0 .776.086 1.453.173 2.13-.26.13-.606.217-1.04.217-.52 0-.953-.217-1.3-.304-.086 0-.173-.043-.26-.043-.346 0-.606.26-.606.563 0 .26.173.477.52.607.086.043.953.347 1.126 1.17.26 1.474 4.025 6.417 7.87 6.417.087 0 .26-.043.26-.043s.087.043.26.043c3.846 0 7.611-4.943 7.87-6.417.173-.823 1.04-1.127 1.127-1.17.346-.13.52-.347.52-.607 0-.303-.26-.563-.607-.563-.086 0-.173.043-.26.043-.346.087-.779.304-1.3.304-.433 0-.779-.087-1.04-.217.087-.677.174-1.354.174-2.13C18.71 5.554 15.836 3 12.166 3z"/></svg>
+    </div>
+    <span class="logo-text">تقرير الأداء الإعلاني</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <span class="header-meta">مارس 2025 — مارس 2026</span>
+    <span class="badge-live">محدّث</span>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- PAGE TITLE -->
+  <div class="page-title">
+    <h1>أداء إعلانات <span class="snap-accent">سنابشات</span> — آخر 12 شهر</h1>
+    <p>تحليل شامل لجميع المقاييس الرئيسية على مستوى الحملات الإعلانية · الأرقام بالدولار الأمريكي</p>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid" id="kpis"></div>
+
+  <!-- CHART SECTION -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-title">الأداء الشهري</div>
+        <div class="section-sub" id="chart-desc">اختر المتريك أدناه</div>
+      </div>
+    </div>
+    <div class="chart-tabs" id="chart-tabs"></div>
+    <div class="chart-card">
+      <div class="chart-wrapper"><canvas id="mainChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TABLE SECTION -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-title">جدول الأداء التفصيلي</div>
+        <div class="section-sub">الأخضر = أفضل قيمة &nbsp;·&nbsp; الأحمر = أسوأ قيمة &nbsp;·&nbsp; الأصفر = متوسط</div>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>الشهر</th>
+              <th>Cost ($)</th>
+              <th>Sign Ups</th>
+              <th>Cost / Signup</th>
+              <th>CPC</th>
+              <th>CPM</th>
+              <th>Click Rate</th>
+              <th>Clicks</th>
+              <th>Impressions</th>
+              <th>Reach</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="section">
+    <div class="section-header">
+      <div>
+        <div class="section-title">أبرز الملاحظات والتحليلات</div>
+        <div class="section-sub">استنتاجات مبنية على البيانات الفعلية</div>
+      </div>
+    </div>
+    <div class="insights-grid">
+
+      <div class="insight-card">
+        <span class="insight-tag tag-good">أفضل أداء</span>
+        <div class="insight-title">أغسطس 2025 — أرخص تسجيل</div>
+        <div class="insight-metric">$4.40</div>
+        <div class="insight-body">أفضل Cost/Signup في كامل الفترة. الإنفاق كان معتدلاً ($12.8K) مع تسجيلات ممتازة (2,916) مما يعني كفاءة عالية في استهداف الجمهور.</div>
+      </div>
+
+      <div class="insight-card">
+        <span class="insight-tag tag-good">ذروة الحجم</span>
+        <div class="insight-title">يناير 2026 — أعلى تسجيلات</div>
+        <div class="insight-metric">20,372</div>
+        <div class="insight-body">أعلى عدد تسجيلات في الفترة بأكملها مع تكلفة معقولة $7.12 للتسجيل. الإنفاق بلغ $145K مع 93M impression.</div>
+      </div>
+
+      <div class="insight-card">
+        <span class="insight-tag tag-warn">تحذير</span>
+        <div class="insight-title">ديسمبر 2025 — ارتفاع التكلفة</div>
+        <div class="insight-metric">$10.27</div>
+        <div class="insight-body">رغم الإنفاق الأعلى ($180K)، ارتفع Cost/Signup بشكل ملحوظ. الضغط التنافسي في موسم الأعياد رفع CPM إلى $1.89.</div>
+      </div>
+
+      <div class="insight-card">
+        <span class="insight-tag tag-warn">يحتاج مراجعة</span>
+        <div class="insight-title">مارس 2026 — انفصال النقر عن التسجيل</div>
+        <div class="insight-metric">CTR 1.05%</div>
+        <div class="insight-body">أعلى Click Rate في الفترة (1.05%) لكن أسوأ Cost/Signup ($26.39). الجمهور ينقر لكن لا يسجّل — احتمال مشكلة في صفحة الهبوط أو تأثير رمضان على قرار التسجيل الفوري.</div>
+      </div>
+
+      <div class="insight-card">
+        <span class="insight-tag tag-info">اتجاه</span>
+        <div class="insight-title">ارتفاع تدريجي في CPM</div>
+        <div class="insight-metric">$0.33 → $2.30</div>
+        <div class="insight-body">CPM ارتفع من $0.33 في أبريل 2025 إلى $2.31 في أكتوبر 2025 — أي 7x في 6 أشهر. يعكس ارتفاع المنافسة على مخزون سنابشات في المنطقة.</div>
+      </div>
+
+      <div class="insight-card">
+        <span class="insight-tag tag-info">ملاحظة</span>
+        <div class="insight-title">أبريل 2025 — أرخص CPC</div>
+        <div class="insight-metric">$0.149</div>
+        <div class="insight-body">أرخص تكلفة للنقرة في الفترة كلها مع Impressions مرتفعة نسبياً (10.8M). فترة منافسة منخفضة يمكن الاستفادة منها مستقبلاً.</div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <span>تقرير أداء إعلانات سنابشات · مارس 2025 — مارس 2026</span>
+  <span>جميع الأرقام بالدولار الأمريكي · Reach تقريبي (72% من Impressions)</span>
+</footer>
+
+<script>
+const DATA = [
+  {m:'مارس 25',   spend:13074.04,  su:1733,  imp:21382241, cl:53320,  cpc:0.2452, cpm:0.6114, cps:7.5442,  ctr:0.2494, reach:15395213},
+  {m:'أبريل 25',  spend:3580.93,   su:719,   imp:10891751, cl:23975,  cpc:0.1494, cpm:0.3288, cps:4.9804,  ctr:0.2201, reach:7842060},
+  {m:'مايو 25',   spend:12593.84,  su:2097,  imp:31047262, cl:80915,  cpc:0.1556, cpm:0.4056, cps:6.0056,  ctr:0.2606, reach:22354028},
+  {m:'يونيو 25',  spend:8984.90,   su:1419,  imp:11435469, cl:49479,  cpc:0.1816, cpm:0.7857, cps:6.3319,  ctr:0.4327, reach:8233537},
+  {m:'يوليو 25',  spend:7349.90,   su:990,   imp:6114529,  cl:32393,  cpc:0.2269, cpm:1.2020, cps:7.4241,  ctr:0.5298, reach:4402460},
+  {m:'أغسطس 25',  spend:12819.02,  su:2916,  imp:12437864, cl:56832,  cpc:0.2256, cpm:1.0306, cps:4.3961,  ctr:0.4569, reach:8955262},
+  {m:'سبتمبر 25', spend:16979.14,  su:2973,  imp:8201326,  cl:39111,  cpc:0.4341, cpm:2.0703, cps:5.7111,  ctr:0.4769, reach:5904954},
+  {m:'أكتوبر 25', spend:14097.27,  su:2187,  imp:6098468,  cl:32787,  cpc:0.4300, cpm:2.3116, cps:6.4459,  ctr:0.5376, reach:4390896},
+  {m:'نوفمبر 25', spend:73797.58,  su:9572,  imp:44446410, cl:217819, cpc:0.3388, cpm:1.6604, cps:7.7097,  ctr:0.4901, reach:32001415},
+  {m:'ديسمبر 25', spend:180210.39, su:17547, imp:95530841, cl:503543, cpc:0.3579, cpm:1.8864, cps:10.2702, ctr:0.5271, reach:68782205},
+  {m:'يناير 26',  spend:145059.80, su:20372, imp:93928188, cl:596311, cpc:0.2433, cpm:1.5444, cps:7.1205,  ctr:0.6349, reach:67628295},
+  {m:'فبراير 26', spend:122340.43, su:10520, imp:56195328, cl:444574, cpc:0.2752, cpm:2.1771, cps:11.6293, ctr:0.7911, reach:40460636},
+  {m:'مارس 26',   spend:13882.99,  su:526,   imp:6043573,  cl:63589,  cpc:0.2183, cpm:2.2971, cps:26.3935, ctr:1.0522, reach:4351372},
+];
+
+const METRICS = [
+  {k:'spend', lbl:'Cost',          desc:'الإنفاق الشهري بالدولار',       fmt:v=>'$'+v.toLocaleString('en',{maximumFractionDigits:0}), yf:v=>'$'+(v/1000).toFixed(0)+'K', low:false, color:'#FFFC00'},
+  {k:'su',    lbl:'Sign Ups',      desc:'عدد التسجيلات الشهرية',          fmt:v=>v.toLocaleString('en'),                               yf:v=>v>=1000?(v/1000).toFixed(1)+'K':String(v), low:false, color:'#22c55e'},
+  {k:'cps',   lbl:'Cost/Signup',   desc:'تكلفة التسجيل الواحد ($)',       fmt:v=>'$'+v.toFixed(2),                                    yf:v=>'$'+v.toFixed(2), low:true,  color:'#f59e0b'},
+  {k:'cpc',   lbl:'CPC',           desc:'تكلفة النقرة الواحدة ($)',       fmt:v=>'$'+v.toFixed(3),                                    yf:v=>'$'+v.toFixed(3), low:true,  color:'#63b3ed'},
+  {k:'cpm',   lbl:'CPM',           desc:'تكلفة 1000 ظهور ($)',           fmt:v=>'$'+v.toFixed(3),                                    yf:v=>'$'+v.toFixed(2), low:true,  color:'#a78bfa'},
+  {k:'ctr',   lbl:'Click Rate',    desc:'معدل النقر على الإعلان (%)',     fmt:v=>v.toFixed(3)+'%',                                    yf:v=>v.toFixed(2)+'%', low:false, color:'#fb923c'},
+  {k:'cl',    lbl:'Clicks',        desc:'إجمالي النقرات الشهرية',         fmt:v=>v.toLocaleString('en'),                               yf:v=>(v/1000).toFixed(0)+'K', low:false, color:'#34d399'},
+  {k:'imp',   lbl:'Impressions',   desc:'مرات ظهور الإعلان شهرياً',      fmt:v=>(v/1e6).toFixed(2)+'M',                              yf:v=>(v/1e6).toFixed(1)+'M', low:false, color:'#60a5fa'},
+  {k:'reach', lbl:'Reach',         desc:'الوصول التقريبي شهرياً',         fmt:v=>(v/1e6).toFixed(2)+'M',                              yf:v=>(v/1e6).toFixed(1)+'M', low:false, color:'#e879f9'},
+];
+
+let activeKey = 'spend';
+let chart;
+
+// --- KPIs ---
+function renderKPIs() {
+  const tS  = DATA.reduce((a,r)=>a+r.spend, 0);
+  const tSU = DATA.reduce((a,r)=>a+r.su,    0);
+  const tCl = DATA.reduce((a,r)=>a+r.cl,    0);
+  const tIm = DATA.reduce((a,r)=>a+r.imp,   0);
+  const cards = [
+    {lbl:'إجمالي الإنفاق',    val:'$'+(tS/1000).toFixed(0)+'K',      sub:tS.toLocaleString('en',{maximumFractionDigits:0})+' دولار'},
+    {lbl:'إجمالي التسجيلات', val:tSU.toLocaleString('en'),           sub:'sign up خلال 12 شهر'},
+    {lbl:'متوسط Cost/Signup', val:'$'+(tS/tSU).toFixed(2),           sub:'لكل تسجيل واحد', snap:true},
+    {lbl:'متوسط CPC',         val:'$'+(tS/tCl).toFixed(3),           sub:'لكل نقرة واحدة'},
+    {lbl:'متوسط CPM',         val:'$'+(tS/tIm*1000).toFixed(3),      sub:'لكل 1000 ظهور'},
+    {lbl:'إجمالي النقرات',   val:(tCl/1000).toFixed(0)+'K',         sub:tCl.toLocaleString('en')+' نقرة'},
+    {lbl:'إجمالي Impressions',val:(tIm/1e6).toFixed(0)+'M',          sub:'مرة ظهور'},
+    {lbl:'متوسط Click Rate',  val:(tCl/tIm*100).toFixed(3)+'%',      sub:'معدل النقر الإجمالي'},
+  ];
+  document.getElementById('kpis').innerHTML = cards.map(c=>`
+    <div class="kpi-card">
+      <div class="kpi-label">${c.lbl}</div>
+      <div class="kpi-value ${c.snap?'kpi-snap':''}">${c.val}</div>
+      <div class="kpi-sub">${c.sub}</div>
+    </div>`).join('');
+}
+
+// --- TABS ---
+function renderTabs() {
+  document.getElementById('chart-tabs').innerHTML = METRICS.map(m=>`
+    <button class="ctab${m.k===activeKey?' on':''}" onclick="setMetric('${m.k}')">${m.lbl}</button>`).join('');
+}
+
+// --- CHART ---
+function renderChart() {
+  const m = METRICS.find(x=>x.k===activeKey);
+  document.getElementById('chart-desc').textContent = m.desc;
+  const vals = DATA.map(r=>r[activeKey]);
+  const maxV = Math.max(...vals);
+  const bgColors = vals.map(v => v===maxV ? m.color : m.color+'55');
+  if(chart) chart.destroy();
+  chart = new Chart(document.getElementById('mainChart'), {
+    type:'bar',
+    data:{
+      labels: DATA.map(r=>r.m),
+      datasets:[{
+        data: vals,
+        backgroundColor: bgColors,
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          rtl:true,
+          backgroundColor:'#1a1a1a',
+          borderColor:'rgba(255,255,255,0.1)',
+          borderWidth:1,
+          titleColor:'#fff',
+          bodyColor:'#aaa',
+          padding:12,
+          callbacks:{
+            title: c => c[0].label,
+            label: c => '  '+m.lbl+': '+m.fmt(c.raw)
+          }
+        }
+      },
+      scales:{
+        x:{
+          grid:{display:false},
+          ticks:{font:{size:11,family:'Cairo'},color:'#666',maxRotation:45,autoSkip:false}
+        },
+        y:{
+          grid:{color:'rgba(255,255,255,0.05)'},
+          ticks:{font:{size:11,family:'Cairo'},color:'#666',callback:v=>m.yf(v)}
+        }
+      }
+    }
+  });
+}
+
+// --- TABLE ---
+function renderTable() {
+  function pill(v, key) {
+    const arr = DATA.map(r=>r[key]);
+    const mn = Math.min(...arr), mx = Math.max(...arr);
+    const m = METRICS.find(x=>x.k===key);
+    let cls = 'py';
+    if(m.low){ if(v===mn) cls='pg'; else if(v===mx) cls='pr'; }
+    else      { if(v===mx) cls='pg'; else if(v===mn) cls='pr'; }
+    return `<span class="pill ${cls}">${m.fmt(v)}</span>`;
+  }
+  document.getElementById('tableBody').innerHTML = DATA.map(r=>`
+    <tr>
+      <td class="month-cell">${r.m}</td>
+      <td>${pill(r.spend,'spend')}</td>
+      <td>${pill(r.su,'su')}</td>
+      <td>${pill(r.cps,'cps')}</td>
+      <td>${pill(r.cpc,'cpc')}</td>
+      <td>${pill(r.cpm,'cpm')}</td>
+      <td>${pill(r.ctr,'ctr')}</td>
+      <td class="pn">${r.cl.toLocaleString('en')}</td>
+      <td class="pn">${(r.imp/1e6).toFixed(2)}M</td>
+      <td class="pn">${(r.reach/1e6).toFixed(2)}M</td>
+    </tr>`).join('');
+}
+
+window.setMetric = function(k) {
+  activeKey = k;
+  renderTabs();
+  renderChart();
+};
+
+renderKPIs();
+renderTabs();
+renderChart();
+renderTable();
+</script>
+</body>
+</html>
